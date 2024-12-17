@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pong Game</title>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #000428, #004e92);
+            color: white;
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+        }
+
+        canvas {
+            border: 2px solid white;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+
+        /* Game Over Text */
+        #game-over {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 50px;
+            color: red;
+            display: none;
+            text-align: center;
+            animation: pulse 1s infinite;
+        }
+
+        /* Restart Button */
+        #restart-btn {
+            position: absolute;
+            top: 60%;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 20px;
+            display: none;
+        }
+
+        #restart-btn:hover {
+            background-color: #45a049;
+        }
+
+        /* Pulse Animation for Game Over Text */
+        @keyframes pulse {
+            0% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.2); }
+            100% { transform: translate(-50%, -50%) scale(1); }
+        }
+
+    </style>
+</head>
+<body>
+    <canvas id="pong" width="800" height="400"></canvas>
+    <div id="game-over">Game Over</div>
+    <button id="restart-btn">Restart</button>
+
+    <script>
+        const canvas = document.getElementById('pong');
+        const context = canvas.getContext('2d');
+
+        const paddleWidth = 10;
+        const paddleHeight = 100;
+        const ballSize = 10;
+        let gameOver = false;
+
+        const player = { x: 0, y: canvas.height / 2 - paddleHeight / 2, width: paddleWidth, height: paddleHeight, dy: 0 };
+        const ai = { x: canvas.width - paddleWidth, y: canvas.height / 2 - paddleHeight / 2, width: paddleWidth, height: paddleHeight };
+        const ball = { x: canvas.width / 2, y: canvas.height / 2, dx: 4, dy: 4, size: ballSize };
+
+        const gameOverText = document.getElementById('game-over');
+        const restartButton = document.getElementById('restart-btn');
+
+        function drawRect(x, y, width, height, color = 'white') {
+            context.fillStyle = color;
+            context.fillRect(x, y, width, height);
+        }
+
+        function drawBall(x, y, size, color = 'white') {
+            context.beginPath();
+            context.arc(x, y, size, 0, Math.PI * 2);
+            context.fillStyle = color;
+            context.fill();
+            context.closePath();
+        }
+
+        function drawNet() {
+            context.fillStyle = 'white';
+            for (let i = 0; i < canvas.height; i += 20) {
+                context.fillRect(canvas.width / 2 - 1, i, 2, 10);
+            }
+        }
+
+        function showGameOver() {
+            gameOverText.style.display = 'block';
+            restartButton.style.display = 'inline-block';
+            canvas.style.opacity = 0.2; // Faded canvas when game over
+        }
+
+        function restartGame() {
+            ball.x = canvas.width / 2;
+            ball.y = canvas.height / 2;
+            ball.dx = 4;
+            ball.dy = 4;
+            player.y = canvas.height / 2 - paddleHeight / 2;
+            ai.y = canvas.height / 2 - paddleHeight / 2;
+            gameOver = false;
+            gameOverText.style.display = 'none';
+            restartButton.style.display = 'none';
+            canvas.style.opacity = 1; // Restore canvas opacity
+            gameLoop(); // Restart game loop
+        }
+
+        function update() {
+            if (gameOver) return;
+
+            ball.x += ball.dx;
+            ball.y += ball.dy;
+
+            // Ball collision with top and bottom walls
+            if (ball.y <= 0 || ball.y + ball.size >= canvas.height) {
+                ball.dy *= -1;
+            }
+
+            // Ball collision with player paddle
+            if (
+                ball.x <= player.x + player.width &&
+                ball.y >= player.y &&
+                ball.y <= player.y + player.height
+            ) {
+                ball.dx *= -1;
+            }
+
+            // Ball collision with AI paddle
+            if (
+                ball.x + ball.size >= ai.x &&
+                ball.y >= ai.y &&
+                ball.y <= ai.y + ai.height
+            ) {
+                ball.dx *= -1;
+            }
+
+            // Reset ball if it goes out of bounds (player loses)
+            if (ball.x < 0 || ball.x > canvas.width) {
+                gameOver = true;
+                showGameOver();
+                return;
+            }
+
+            // AI paddle movement
+            ai.y += (ball.y - (ai.y + ai.height / 2)) * 0.1;
+
+            // Player paddle movement
+            player.y += player.dy;
+
+            // Prevent paddles from going out of bounds
+            player.y = Math.max(0, Math.min(canvas.height - player.height, player.y));
+            ai.y = Math.max(0, Math.min(canvas.height - ai.height, ai.y));
+        }
+
+        function draw() {
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            drawNet();
+            drawRect(player.x, player.y, player.width, player.height);
+            drawRect(ai.x, ai.y, ai.width, ai.height);
+            drawBall(ball.x, ball.y, ball.size);
+        }
+
+        function gameLoop() {
+            update();
+            draw();
+            if (!gameOver) requestAnimationFrame(gameLoop);
+        }
+
+        // Keyboard controls
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowUp') player.dy = -6;
+            if (e.key === 'ArrowDown') player.dy = 6;
+        });
+
+        document.addEventListener('keyup', (e) => {
+            if (e.key === 'ArrowUp' || e.key === 'ArrowDown') player.dy = 0;
+        });
+
+        // Restart button action
+        restartButton.addEventListener('click', restartGame);
+
+        gameLoop();
+    </script>
+</body>
+</html>

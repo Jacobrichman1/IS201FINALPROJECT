@@ -1,0 +1,60 @@
+/* Scope styles only to scratch.html using the .scratch-page class */
+body.scratch-page {
+    background-color: rgba(210, 149, 29, 0.84); /* Light gray background */
+    font-family: Arial, sans-serif; /* Simple sans-serif font */
+    color: #333; /* Dark text for better readability */
+}
+
+/* Header styles */
+body.scratch-page #header {
+    background-color: #060606; /* Green header */
+    color: white;
+    padding: 15px;
+}
+
+
+/* Footer styles */
+body.scratch-page #footer {
+    background-color: #333; /* Dark footer */
+    color: white;
+    padding: 10px;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+}
+
+/* Button styles */
+body.scratch-page button {
+    background-color: #0f110f; /* Green button */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+body.scratch-page button:hover {
+    background-color: #070a07; /* Slightly darker green on hover */
+}
+
+/* Links */
+body.scratch-page a {
+    color: #050605; /* Green links */
+    text-decoration: none;
+}
+
+body.scratch-page a:hover {
+    color: #020303; /* Darker green on hover */
+}
+
+/* Container */
+body.scratch-page .container {
+    max-width: 1000px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+
